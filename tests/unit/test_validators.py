@@ -18,7 +18,7 @@ def test_normalize_country(raw, expected):
 @pytest.mark.parametrize(
     "raw",
     [
-        "USA", "U", "123", "12 3"
+        "USA", "U", "123", "12 3", "12"
     ]
 )
 def test_normalize_country_invalid_raises(raw):
@@ -36,14 +36,34 @@ def test_normalize_country_invalid_raises(raw):
         ("", False),
         (None, False),
         (" 5 ", True),
-    ]
+        (0, True),
+        ([1], False),
+        ("inf", False)
+    ],
+    ids=["decimal_str", "zero_str", "int", "negative", "non_numeric", "empty", "none", "padded", "zero_int", "list", "inf_lower"]
 )
 def test_is_valid_amount(raw, expected):
     assert is_valid_amount(raw) == expected
 
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        ("placed", "PLACED"),
+        (" shipped", "SHIPPED"),
+        ("cancelled", "CANCELLED"),
+        ("COMPLETED", "COMPLETED"),
+    ],
+    ids=["lower", "leading_space", "cancelled", "already_upper"],
+)
+def test_normalize_status_valid(raw, expected):
+    assert normalize_status(raw) == expected
 
-def test_normalize_status():
-    with pytest.raises(ValueError, match= "Invalid status"):
-        normalize_status("done")
-
+@pytest.mark.parametrize(
+    "raw",
+    ["done", "", " ", None, 123],
+    ids=["unknown", "empty", "blank", "none", "int"],
+)
+def test_normalize_status_invalid_raises(raw):
+    with pytest.raises(ValueError, match="Invalid status:"):
+        normalize_status(raw)
 

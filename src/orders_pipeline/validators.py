@@ -1,34 +1,34 @@
+import math
 
-
-def normalize_country(code: str) -> str|None:
+def normalize_country(code: str|None) -> str|None:
     if not code:
         return None
     clean_code = code.strip().upper()
     if clean_code == "":
         return None
-    if len(clean_code) != 2:
-        raise ValueError
-    return clean_code if clean_code in {"US", "IN", "DE"} else None
+    if len(clean_code) != 2 or not clean_code.isalpha():
+        raise ValueError(f"Invalid country_code {code}")
+    return clean_code 
 
 
 def is_valid_amount(value)->bool:
     try:
-        if not value or value == "inf":
-            return False
         val = float(value)
-    except ValueError or TypeError as e:
+    except (ValueError, TypeError):
         return False
     else:
-        return True if val >= 0 else False
+        return val >= 0 and math.isfinite(val)
     
 
 def normalize_status(s)->str:
+    if not isinstance(s, str):
+        raise ValueError(f"Invalid status: {s!r}")
     status = s.strip().upper()
     valid = {"PLACED", "SHIPPED", "COMPLETED", "CANCELLED"}
     if status in valid:
         return status
-    else:
-        raise ValueError(f"Invalid status: {s}")
+    raise ValueError(f"Invalid status: {s!r}")
+    
     
 
 
